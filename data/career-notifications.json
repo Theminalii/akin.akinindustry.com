@@ -1,0 +1,21 @@
+{
+  "gmail": {
+    "enabled": true,
+    "recipientEmail": "office@cervision.com",
+    "senderEmail": "emin.cumaliyev5@gmail.com",
+    "appPassword": "fptg syum byir qdtx",
+    "subjectPrefix": "Akin Career"
+  },
+  "telegram": {
+    "enabled": false,
+    "botToken": "",
+    "chatId": ""
+  },
+  "whatsapp": {
+    "enabled": false,
+    "accessToken": "",
+    "phoneNumberId": "",
+    "recipientPhone": "",
+    "apiVersion": "v23.0"
+  }
+}
