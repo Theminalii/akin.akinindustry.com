@@ -75,7 +75,13 @@ export function Header() {
                 'bg-transparent'
               )}
             >
-              <Image src="/logo.png" alt="Akin Industry Logo" width={48} height={48} className="object-contain" />
+              <Image
+                src="/logo.png"
+                alt="Akin Industry Logo"
+                width={48}
+                height={48}
+                className="h-auto w-auto object-contain"
+              />
             </div>
             <div className="flex flex-col">
               <span

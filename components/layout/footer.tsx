@@ -38,7 +38,7 @@ export function Footer() {
                   alt="Akin Industry Logo"
                   width={48}
                   height={48}
-                  className="object-contain"
+                  className="h-auto w-auto object-contain"
                 />
               </div>
               <div>

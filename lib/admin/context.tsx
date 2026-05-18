@@ -12,6 +12,7 @@ import {
   services as initialServices,
   team as initialTeam,
 } from '@/lib/data'
+import { readPersistedJson, writePersistedJson } from '@/lib/browser-storage'
 import type {
   Certificate,
   CompanyStats,
@@ -23,7 +24,7 @@ import type {
   TeamMember,
 } from '@/lib/types'
 
-interface ContactInfo {
+export interface ContactInfo {
   phone1: string
   phone2: string
   email1: string
@@ -111,7 +112,7 @@ const defaultAdminAccounts: AdminAccount[] = [
   },
 ]
 
-const STORAGE_KEY = 'akin_admin_data_v2'
+const STORAGE_KEY = 'akin_admin_data_v3'
 const AUTH_STORAGE_KEY = 'akin_admin_auth'
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined)
@@ -131,43 +132,62 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
+    let isMounted = true
 
-    if (saved) {
+    const loadAdminData = async () => {
       try {
-        const parsed = JSON.parse(saved)
+        const parsed = await readPersistedJson<Partial<{
+          projects: Project[]
+          news: NewsArticle[]
+          team: TeamMember[]
+          services: Service[]
+          jobs: JobPosition[]
+          certificates: Certificate[]
+          partners: Partner[]
+          contact: ContactInfo
+          stats: CompanyStats
+          adminAccounts: AdminAccount[]
+        }>>(STORAGE_KEY)
 
-        if (parsed.projects) setProjects(parsed.projects)
-        if (parsed.news) setNews(parsed.news)
-        if (parsed.team) setTeam(parsed.team)
-        if (parsed.services) setServices(parsed.services)
-        if (parsed.jobs) setJobs(parsed.jobs)
-        if (parsed.certificates) setCertificates(parsed.certificates)
-        if (parsed.partners) setPartners(parsed.partners)
-        if (parsed.contact) setContact({ ...defaultContact, ...parsed.contact })
-        if (parsed.stats) setStats(parsed.stats)
-        if (parsed.adminAccounts?.length) setAdminAccounts(parsed.adminAccounts)
+        if (parsed && isMounted) {
+          if (parsed.projects) setProjects(parsed.projects)
+          if (parsed.news) setNews(parsed.news)
+          if (parsed.team) setTeam(parsed.team)
+          if (parsed.services) setServices(parsed.services)
+          if (parsed.jobs) setJobs(parsed.jobs)
+          if (parsed.certificates) setCertificates(parsed.certificates)
+          if (parsed.partners) setPartners(parsed.partners)
+          if (parsed.contact) setContact({ ...defaultContact, ...parsed.contact })
+          if (parsed.stats) setStats(parsed.stats)
+          if (parsed.adminAccounts?.length) setAdminAccounts(parsed.adminAccounts)
+        }
       } catch (error) {
         console.error('Error loading admin data:', error)
+      } finally {
+        if (!isMounted) return
+
+        const auth = localStorage.getItem(AUTH_STORAGE_KEY)
+        if (auth) {
+          const normalizedEmail =
+            auth === 'true' ? defaultAdminAccounts[0].email : auth.trim().toLowerCase()
+          setCurrentAdminEmail(normalizedEmail)
+        }
+
+        setIsLoaded(true)
       }
     }
 
-    const auth = localStorage.getItem(AUTH_STORAGE_KEY)
-    if (auth) {
-      const normalizedEmail =
-        auth === 'true' ? defaultAdminAccounts[0].email : auth.trim().toLowerCase()
-      setCurrentAdminEmail(normalizedEmail)
-    }
+    loadAdminData()
 
-    setIsLoaded(true)
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   useEffect(() => {
     if (!isLoaded) return
 
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
+    writePersistedJson(STORAGE_KEY, {
         projects,
         news,
         team,
@@ -178,8 +198,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         contact,
         stats,
         adminAccounts,
+      }).catch((error) => {
+        console.error('Error saving admin data:', error)
       })
-    )
   }, [
     projects,
     news,
@@ -229,7 +250,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const updateProject = useCallback((id: string, updates: Partial<Project>) => {
-    setProjects((prev) => prev.map((project) => (project.id === id ? { ...project, ...updates } : project)))
+    setProjects((prev) =>
+      prev.map((project) => (project.id === id ? { ...project, ...updates } : project))
+    )
   }, [])
 
   const deleteProject = useCallback((id: string) => {

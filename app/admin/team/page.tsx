@@ -6,6 +6,7 @@ import { Edit, Image as ImageIcon, Plus, Trash2, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAdmin } from '@/lib/admin/context'
+import { optimizeImageFile } from '@/lib/image-upload'
 
 type TeamFormData = {
   name: string
@@ -27,15 +28,17 @@ export default function AdminTeamPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<TeamFormData>(emptyForm)
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, image: reader.result as string }))
+    try {
+      const optimizedImage = await optimizeImageFile(file, { maxDimension: 1200, quality: 0.76 })
+      setFormData((prev) => ({ ...prev, image: optimizedImage }))
+    } catch (error) {
+      console.error('Team image upload failed:', error)
+      alert('Şəkil emal olunarkən problem yarandı. Daha kiçik fayl sınayın.')
     }
-    reader.readAsDataURL(file)
     e.target.value = ''
   }
 
@@ -137,7 +140,7 @@ export default function AdminTeamPage() {
                   </label>
 
                   <p className="text-xs leading-5 text-slate-500">
-                    JPG, PNG və WEBP seçə bilərsən. Şəkil brauzerdə saxlanılır və dərhal preview görünür.
+                    JPG, PNG və WEBP seçə bilərsən. Şəkil avtomatik sıxılır və dərhal preview görünür.
                   </p>
 
                   {formData.image && (

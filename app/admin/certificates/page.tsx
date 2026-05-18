@@ -6,6 +6,7 @@ import { Edit, Image as ImageIcon, Plus, Trash2, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAdmin } from '@/lib/admin/context'
+import { optimizeImageFile } from '@/lib/image-upload'
 
 type CertificateFormData = {
   title: string
@@ -31,15 +32,17 @@ export default function AdminCertificatesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<CertificateFormData>(emptyForm)
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, image: reader.result as string }))
+    try {
+      const optimizedImage = await optimizeImageFile(file, { maxDimension: 1400, quality: 0.78 })
+      setFormData((prev) => ({ ...prev, image: optimizedImage }))
+    } catch (error) {
+      console.error('Certificate image upload failed:', error)
+      alert('Şəkil emal olunarkən problem yarandı. Daha kiçik fayl sınayın.')
     }
-    reader.readAsDataURL(file)
     e.target.value = ''
   }
 
@@ -163,7 +166,7 @@ export default function AdminCertificatesPage() {
                     <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                   </label>
                   <p className="text-xs leading-5 text-slate-500">
-                    Yüklənən şəkil sertifikat kartında və preview-da dərhal görünəcək.
+                    Yüklənən şəkil sıxılır ki, sertifikat kartı hostingdə daha stabil açılsın.
                   </p>
                 </div>
               </div>

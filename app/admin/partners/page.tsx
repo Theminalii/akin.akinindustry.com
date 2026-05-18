@@ -6,6 +6,7 @@ import { Edit, Image as ImageIcon, Plus, Trash2, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAdmin } from '@/lib/admin/context'
+import { optimizeImageFile } from '@/lib/image-upload'
 
 type PartnerFormData = {
   name: string
@@ -23,15 +24,17 @@ export default function AdminPartnersPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<PartnerFormData>(emptyForm)
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, logo: reader.result as string }))
+    try {
+      const optimizedImage = await optimizeImageFile(file, { maxDimension: 1000, quality: 0.76 })
+      setFormData((prev) => ({ ...prev, logo: optimizedImage }))
+    } catch (error) {
+      console.error('Partner logo upload failed:', error)
+      alert('Logo emal olunarkən problem yarandı. Daha kiçik fayl sınayın.')
     }
-    reader.readAsDataURL(file)
     e.target.value = ''
   }
 
@@ -119,7 +122,7 @@ export default function AdminPartnersPage() {
                   <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
                 </label>
                 <p className="text-xs leading-5 text-slate-500">
-                  Logo seçildikdən sonra ana səhifədəki tərəfdaşlar hissəsində dərhal görünəcək.
+                  Logo seçildikdən sonra avtomatik sıxılır və ana səhifədə daha stabil görünür.
                 </p>
               </div>
             </div>

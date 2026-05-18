@@ -4,7 +4,8 @@ import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAdmin } from '@/lib/admin/context'
-eimport { Edit, Trash2, Plus, X, Upload, Image as ImageIcon } from 'lucide-react'
+import { optimizeImageFile } from '@/lib/image-upload'
+import { Edit, Trash2, Plus, X, Upload, Image as ImageIcon } from 'lucide-react'
 
 export default function ProjectsAdmin() {
   const { projects, addProject, updateProject, deleteProject } = useAdmin()
@@ -23,18 +24,23 @@ export default function ProjectsAdmin() {
     featured: false
   })
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
-    Array.from(files).forEach(file => {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64String = reader.result as string
-        setFormData(prev => ({ ...prev, images: [...prev.images, base64String] }))
-      }
-      reader.readAsDataURL(file)
-    })
+    try {
+      const optimizedImages = await Promise.all(
+        Array.from(files).map((file) =>
+          optimizeImageFile(file, { maxDimension: 1400, quality: 0.78 })
+        )
+      )
+
+      setFormData((prev) => ({ ...prev, images: [...prev.images, ...optimizedImages] }))
+    } catch (error) {
+      console.error('Project image upload failed:', error)
+      alert('Şəkil emal olunarkən problem yarandı. Daha kiçik fayl sınayın.')
+    }
+
     e.target.value = ''
   }
 
@@ -116,6 +122,7 @@ export default function ProjectsAdmin() {
                   <input type="file" multiple className="hidden" accept="image/*" onChange={handleFileUpload} />
                 </label>
               </div>
+              <p className="text-xs text-slate-500">Şəkillər avtomatik sıxılır ki, hostingdə səhifə çökməsin.</p>
             </div>
 
             <textarea placeholder="Təsvir" rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-2 border rounded bg-white" />

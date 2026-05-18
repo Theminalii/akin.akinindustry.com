@@ -120,7 +120,7 @@ export const projects: Project[] = [
     location: 'Baki / Azerbaycan',
     year: 2021,
     area: '55 ton',
-    images: ['/images/projects/project4.webp', '/images/projects/sumgait-2.jpg'],
+    images: ['/images/projects/project4.webp', '/images/projects/project6.webp'],
     featured: true
   },
   {
@@ -133,7 +133,7 @@ export const projects: Project[] = [
     location: 'Mingəçevir, Azərbaycan',
     year: 2020,
     area: '1500 ton Beton / 350 ton Metal',
-    images: ['/images/projects/project10.webp', '/images/projects/ring-road-2.jpg'],
+    images: ['/images/projects/project10.webp', '/images/projects/project11.webp'],
     featured: true
   },
   {
@@ -146,7 +146,7 @@ export const projects: Project[] = [
     location: 'Bakı, Azərbaycan',
     year: 2023,
     area: '55 ton',
-    images: ['/images/projects/project7.webp', '/images/projects/flame-towers-2.jpg'],
+    images: ['/images/projects/project7.webp', '/images/projects/project12.webp'],
     featured: true
   },
   {
@@ -159,7 +159,7 @@ export const projects: Project[] = [
     location: 'Şirvan, Azərbaycan',
     year: 2022,
     area: '85 ton Metal + Trapez Kaplama',
-    images: ['/images/projects/project8.webp', '/images/projects/ganja-mall-2.jpg'],
+    images: ['/images/projects/project8.webp', '/images/projects/project13.webp'],
     featured: true
   }
 ]
@@ -172,7 +172,7 @@ export const news: NewsArticle[] = [
     excerpt: 'Akin Industry yeni dövlət infrastruktur layihəsinin icrasına başlayır. 50 milyon AZN dəyərində layihə 2 il ərzində tamamlanacaq.',
     content: 'Akin Industry olaraq yeni infrastruktur layihəsinin icrasına başlamağımızı elan etməkdən məmnunluq duyuruq. Bu layihə Azərbaycan Respublikası Dövlət Yol Agentliyi ilə əməkdaşlıq çərçivəsində həyata keçiriləcək və ölkənin nəqliyyat infrastrukturunun inkişafına əhəmiyyətli töhfə verəcəkdir.\n\nLayihə çərçivəsində 25 km uzunluğunda yeni magistral yol, 4 körpü və müasir işıqlandırma sistemi inşa ediləcəkdir. Tikinti işləri 2024-cü ilin yazında başlayacaq və 2026-cı ilin sonunda tamamlanması planlaşdırılır.',
     date: '2024-01-15',
-    image: '/images/news/infrastructure-project.jpg',
+    image: '/homepage.webp',
     category: 'Layihələr'
   },
   {
@@ -182,7 +182,7 @@ export const news: NewsArticle[] = [
     excerpt: 'Şirkətimiz keyfiyyət idarəetmə sistemi üzrə beynəlxalq ISO 9001:2015 sertifikatına layiq görüldü.',
     content: 'Akin Industry keyfiyyət idarəetmə sistemi üzrə prestijli ISO 9001:2015 sertifikatını aldı. Bu sertifikat şirkətimizin beynəlxalq keyfiyyət standartlarına uyğunluğunu təsdiq edir.\n\nSertifikasiya prosesi TÜV Rheinland tərəfindən aparılmış və şirkətimizdə tətbiq olunan bütün proseslərin beynəlxalq standartlara cavab verdiyini müəyyən etmişdir. Bu nailiyyət müştərilərimizə daha yüksək keyfiyyətli xidmət göstərmək öhdəliyimizin təsdiqidir.',
     date: '2024-01-10',
-    image: '/images/news/iso-certificate.jpg',
+    image: '/images/sertifkat/sertifkat.jpg',
     category: 'Nailiyyətlər'
   },
   {
@@ -192,7 +192,7 @@ export const news: NewsArticle[] = [
     excerpt: 'Akin Industry layihələndirmə proseslərində BIM (Building Information Modeling) texnologiyasını tətbiq etməyə başlayır.',
     content: 'Şirkətimiz layihələndirmə və tikinti proseslərini daha da təkmilləşdirmək məqsədilə BIM texnologiyasına keçid edir. Bu müasir texnologiya layihələrin daha dəqiq planlaşdırılmasına və xərclərin optimallaşdırılmasına imkan verir.\n\nBIM texnologiyası vasitəsilə bütün tikinti prosesi virtual mühitdə modelləşdirilir, potensial problemlər əvvəlcədən aşkar edilir və həll yolları tapılır. Bu, tikinti müddətinin qısalmasına və keyfiyyətin artmasına səbəb olur.',
     date: '2024-01-05',
-    image: '/images/news/bim-technology.jpg',
+    image: '/images/projects/project14.webp',
     category: 'Texnologiya'
   },
   {
@@ -202,7 +202,7 @@ export const news: NewsArticle[] = [
     excerpt: 'Genişlənən layihə portfelimiz üçün müxtəlif sahələrdə yeni əməkdaşlar axtarırıq.',
     content: 'Akin Industry komandası genişlənir! Yeni layihələrimiz üçün mühəndislər, layihə menecerləri və texniki mütəxəssislər axtarırıq.\n\nNamizədlərdən tikinti sahəsində təcrübə, komanda işi bacarıqları və peşəkar yanaşma tələb olunur. Ətraflı məlumat üçün Karyera səhifəmizi ziyarət edin.',
     date: '2023-12-20',
-    image: '/images/news/hiring.jpg',
+    image: '/images/projects/project15.webp',
     category: 'Karyera'
   }
 ]
@@ -212,28 +212,28 @@ export const team: TeamMember[] = [
     id: '1',
     name: 'Əli Həsənov',
     position: 'Baş Direktor',
-    image: '/images/team/ceo.jpg',
+    image: '/placeholder-user.jpg',
     bio: '25 illik tikinti sahəsində təcrübə. Azərbaycan Tikinti Universitetinin məzunu.'
   },
   {
     id: '2',
     name: 'Leyla Məmmədova',
     position: 'Texniki Direktor',
-    image: '/images/team/cto.jpg',
+    image: '/placeholder-user.jpg',
     bio: 'Beynəlxalq tikinti layihələrində 15 illik təcrübə. Almaniyada təhsil almışdır.'
   },
   {
     id: '3',
     name: 'Rəşad Əliyev',
     position: 'Layihə Direktoru',
-    image: '/images/team/project-director.jpg',
+    image: '/placeholder-user.jpg',
     bio: 'İri miqyaslı layihələrin idarə edilməsində mütəxəssis. PMP sertifikatlı.'
   },
   {
     id: '4',
     name: 'Nigar Hüseynova',
     position: 'Maliyyə Direktoru',
-    image: '/images/team/cfo.jpg',
+    image: '/placeholder-user.jpg',
     bio: 'ACCA üzvü, 18 illik maliyyə sektorunda təcrübə.'
   }
 ]

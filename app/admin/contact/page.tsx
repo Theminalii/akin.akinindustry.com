@@ -4,22 +4,11 @@ import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAdmin } from '@/lib/admin/context'
-
-type ContactFormData = {
-  phone1: string
-  phone2: string
-  email1: string
-  email2: string
-  address: string
-  workingHours: string
-  googleMapEmbedUrl: string
-  linkedinUrl: string
-}
+import { type ContactInfo, useAdmin } from '@/lib/admin/context'
 
 export default function AdminContactPage() {
   const { contact, updateContact } = useAdmin()
-  const [formData, setFormData] = useState<ContactFormData>(contact)
+  const [formData, setFormData] = useState<ContactInfo>(contact)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
