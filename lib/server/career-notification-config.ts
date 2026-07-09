@@ -5,6 +5,7 @@ import {
   defaultCareerNotificationSettings,
   type CareerNotificationSettings,
 } from '@/lib/career-notifications'
+import { readCareerNotificationEnv } from '@/lib/server/env'
 
 const DATA_DIR = path.join(process.cwd(), 'data')
 const CONFIG_PATH = path.join(DATA_DIR, 'career-notifications.json')
@@ -12,18 +13,23 @@ const CONFIG_PATH = path.join(DATA_DIR, 'career-notifications.json')
 function mergeConfig(
   config?: Partial<CareerNotificationSettings>
 ): CareerNotificationSettings {
+  const envConfig = readCareerNotificationEnv()
+
   return {
     gmail: {
       ...defaultCareerNotificationSettings.gmail,
       ...config?.gmail,
+      ...envConfig.gmail,
     },
     telegram: {
       ...defaultCareerNotificationSettings.telegram,
       ...config?.telegram,
+      ...envConfig.telegram,
     },
     whatsapp: {
       ...defaultCareerNotificationSettings.whatsapp,
       ...config?.whatsapp,
+      ...envConfig.whatsapp,
     },
   }
 }

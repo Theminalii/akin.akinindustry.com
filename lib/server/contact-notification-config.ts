@@ -5,6 +5,7 @@ import {
   defaultContactNotificationSettings,
   type ContactNotificationSettings,
 } from '@/lib/contact-notifications'
+import { readContactNotificationEnv } from '@/lib/server/env'
 
 const DATA_DIR = path.join(process.cwd(), 'data')
 const CONFIG_PATH = path.join(DATA_DIR, 'contact-notifications.json')
@@ -12,14 +13,18 @@ const CONFIG_PATH = path.join(DATA_DIR, 'contact-notifications.json')
 function mergeConfig(
   config?: Partial<ContactNotificationSettings>
 ): ContactNotificationSettings {
+  const envConfig = readContactNotificationEnv()
+
   return {
     gmail: {
       ...defaultContactNotificationSettings.gmail,
       ...config?.gmail,
+      ...envConfig.gmail,
     },
     whatsapp: {
       ...defaultContactNotificationSettings.whatsapp,
       ...config?.whatsapp,
+      ...envConfig.whatsapp,
     },
   }
 }
