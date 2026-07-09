@@ -44,7 +44,7 @@ const navItems = [
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const { currentAdmin, isAuthenticated, isReady, login, logout } = useAdmin()
-  const [email, setEmail] = useState(currentAdmin?.email ?? 'admin@akinindustry.com')
+  const [email, setEmail] = useState(currentAdmin?.email ?? 'admin')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
@@ -81,21 +81,21 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </div>
             <h1 className="mt-4 text-3xl font-bold text-slate-900">Admin giriş</h1>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Hesab email-i və şifrəsi ilə admin panelə daxil ol.
+              Username və şifrə ilə admin panelə daxil ol.
             </p>
           </div>
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">Email</label>
+              <label className="mb-2 block text-sm font-medium text-slate-700">Login</label>
               <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4">
                 <Mail className="h-4 w-4 text-slate-400" />
                 <input
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-transparent py-3 outline-none"
-                  placeholder="admin@akinindustry.com"
+                  placeholder="admin"
                 />
               </div>
             </div>

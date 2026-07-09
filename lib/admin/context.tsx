@@ -83,6 +83,7 @@ interface AdminContextType {
   adminAccounts: AdminAccount[]
   addAdminAccount: (account: Omit<AdminAccount, 'id'>) => ActionResult
   updateAdminAccountPassword: (id: string, password: string) => ActionResult
+  changeCurrentAdminPassword: (currentPassword: string, newPassword: string) => ActionResult
   deleteAdminAccount: (id: string) => ActionResult
   currentAdmin: AdminAccount | null
   isAuthenticated: boolean
@@ -107,10 +108,34 @@ const defaultAdminAccounts: AdminAccount[] = [
   {
     id: 'admin-default',
     name: 'Admin',
-    email: 'admin@akinindustry.com',
-    password: 'admin123',
+    email: 'admin',
+    password: 'admin1234',
   },
 ]
+
+function ensureDefaultAdminAccount(accounts?: AdminAccount[]) {
+  if (!accounts?.length) {
+    return defaultAdminAccounts
+  }
+
+  const defaultAccount = defaultAdminAccounts[0]
+  const hasDefaultId = accounts.some((account) => account.id === defaultAccount.id)
+
+  if (hasDefaultId) {
+    return accounts.map((account) =>
+      account.id === defaultAccount.id
+        ? {
+            ...account,
+            name: defaultAccount.name,
+            email: defaultAccount.email,
+            password: defaultAccount.password,
+          }
+        : account
+    )
+  }
+
+  return [defaultAccount, ...accounts]
+}
 
 const STORAGE_KEY = 'akin_admin_data_v3'
 const AUTH_STORAGE_KEY = 'akin_admin_auth'
@@ -159,7 +184,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           if (parsed.partners) setPartners(parsed.partners)
           if (parsed.contact) setContact({ ...defaultContact, ...parsed.contact })
           if (parsed.stats) setStats(parsed.stats)
-          if (parsed.adminAccounts?.length) setAdminAccounts(parsed.adminAccounts)
+          if (parsed.adminAccounts?.length) {
+            setAdminAccounts(ensureDefaultAdminAccount(parsed.adminAccounts))
+          }
         }
       } catch (error) {
         console.error('Error loading admin data:', error)
@@ -384,6 +411,39 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     return { success: true, message: 'Şifrə yeniləndi.' }
   }, [])
 
+  const changeCurrentAdminPassword = useCallback(
+    (currentPassword: string, newPassword: string): ActionResult => {
+      const activeAdmin = adminAccounts.find(
+        (account) => account.email.trim().toLowerCase() === currentAdminEmail?.trim().toLowerCase()
+      )
+
+      if (!activeAdmin) {
+        return { success: false, message: 'Aktiv admin hesabı tapılmadı.' }
+      }
+
+      if (!currentPassword.trim() || !newPassword.trim()) {
+        return { success: false, message: 'Bütün şifrə sahələri doldurulmalıdır.' }
+      }
+
+      if (activeAdmin.password !== currentPassword) {
+        return { success: false, message: 'Mövcud şifrə yanlışdır.' }
+      }
+
+      if (currentPassword === newPassword) {
+        return { success: false, message: 'Yeni şifrə əvvəlki ilə eyni ola bilməz.' }
+      }
+
+      setAdminAccounts((prev) =>
+        prev.map((account) =>
+          account.id === activeAdmin.id ? { ...account, password: newPassword } : account
+        )
+      )
+
+      return { success: true, message: 'Login şifrəsi uğurla dəyişdirildi.' }
+    },
+    [adminAccounts, currentAdminEmail]
+  )
+
   const deleteAdminAccount = useCallback(
     (id: string): ActionResult => {
       if (adminAccounts.length === 1) {
@@ -468,6 +528,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     adminAccounts,
     addAdminAccount,
     updateAdminAccountPassword,
+    changeCurrentAdminPassword,
     deleteAdminAccount,
     currentAdmin,
     isAuthenticated: Boolean(currentAdmin),
