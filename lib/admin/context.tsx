@@ -3,15 +3,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import {
-  certificates as initialCertificates,
-  companyStats,
-  jobs as initialJobs,
-  news as initialNews,
-  partners as initialPartners,
-  projects as initialProjects,
-  services as initialServices,
-  team as initialTeam,
-} from '@/lib/data'
+  defaultAdminAccounts,
+  defaultContact,
+  ensureDefaultAdminAccount,
+  getDefaultAdminContent,
+} from '@/lib/admin/defaults'
+import type { AdminAccount, AdminContentData, ContactInfo } from '@/lib/admin/types'
 import { readPersistedJson, writePersistedJson } from '@/lib/browser-storage'
 import type {
   Certificate,
@@ -23,24 +20,6 @@ import type {
   Service,
   TeamMember,
 } from '@/lib/types'
-
-export interface ContactInfo {
-  phone1: string
-  phone2: string
-  email1: string
-  email2: string
-  address: string
-  workingHours: string
-  googleMapEmbedUrl: string
-  linkedinUrl: string
-}
-
-interface AdminAccount {
-  id: string
-  name: string
-  email: string
-  password: string
-}
 
 interface ActionResult {
   success: boolean
@@ -92,104 +71,128 @@ interface AdminContextType {
   logout: () => void
 }
 
-const defaultContact: ContactInfo = {
-  phone1: '+994 55 350 30 69',
-  phone2: '+994 55 350 30 69',
-  email1: 'selim@akinindustry.com',
-  email2: 'sales@akinindustry.az',
-  address: 'Bakı şəhəri, Atatürk prospekti 45',
-  workingHours: 'Bazar ertəsi - Cümə: 09:00 - 18:00',
-  googleMapEmbedUrl:
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3038.455627253573!2d49.8456633!3d40.4087192!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDI0JzMxLjQiTiA0OcKwNTAnNDQuNCJF!5e0!3m2!1sen!2saz!4v1625567000000!5m2!1sen!2saz',
-  linkedinUrl: 'https://www.linkedin.com/',
-}
-
-const defaultAdminAccounts: AdminAccount[] = [
-  {
-    id: 'admin-default',
-    name: 'Admin',
-    email: 'admin',
-    password: 'admin1234',
-  },
-]
-
-function ensureDefaultAdminAccount(accounts?: AdminAccount[]) {
-  if (!accounts?.length) {
-    return defaultAdminAccounts
-  }
-
-  const defaultAccount = defaultAdminAccounts[0]
-  const hasDefaultId = accounts.some((account) => account.id === defaultAccount.id)
-
-  if (hasDefaultId) {
-    return accounts.map((account) =>
-      account.id === defaultAccount.id
-        ? {
-            ...account,
-            name: defaultAccount.name,
-            email: defaultAccount.email,
-            password: defaultAccount.password,
-          }
-        : account
-    )
-  }
-
-  return [defaultAccount, ...accounts]
-}
-
 const STORAGE_KEY = 'akin_admin_data_v3'
 const AUTH_STORAGE_KEY = 'akin_admin_auth'
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined)
 
+function mergeAdminContent(config?: Partial<AdminContentData>): AdminContentData {
+  const defaults = getDefaultAdminContent()
+
+  return {
+    projects: config?.projects ?? defaults.projects,
+    news: config?.news ?? defaults.news,
+    team: config?.team ?? defaults.team,
+    services: config?.services ?? defaults.services,
+    jobs: config?.jobs ?? defaults.jobs,
+    certificates: config?.certificates ?? defaults.certificates,
+    partners: config?.partners ?? defaults.partners,
+    contact: {
+      ...defaultContact,
+      ...config?.contact,
+    },
+    stats: config?.stats ?? defaults.stats,
+    adminAccounts: ensureDefaultAdminAccount(config?.adminAccounts),
+  }
+}
+
+async function fetchAdminContent() {
+  const response = await fetch('/api/admin/content', { cache: 'no-store' })
+  if (!response.ok) {
+    throw new Error('Admin məlumatları yüklənmədi.')
+  }
+
+  return (await response.json()) as {
+    data: AdminContentData
+    hasStoredData: boolean
+  }
+}
+
+async function saveAdminContent(data: AdminContentData) {
+  const response = await fetch('/api/admin/content', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    throw new Error('Admin məlumatları saxlanmadı.')
+  }
+}
+
 export function AdminProvider({ children }: { children: React.ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects)
-  const [news, setNews] = useState<NewsArticle[]>(initialNews)
-  const [team, setTeam] = useState<TeamMember[]>(initialTeam)
-  const [services, setServices] = useState<Service[]>(initialServices)
-  const [jobs, setJobs] = useState<JobPosition[]>(initialJobs)
-  const [certificates, setCertificates] = useState<Certificate[]>(initialCertificates)
-  const [partners, setPartners] = useState<Partner[]>(initialPartners)
-  const [contact, setContact] = useState<ContactInfo>(defaultContact)
-  const [stats, setStats] = useState<CompanyStats>(companyStats)
-  const [adminAccounts, setAdminAccounts] = useState<AdminAccount[]>(defaultAdminAccounts)
+  const defaultData = getDefaultAdminContent()
+  const [projects, setProjects] = useState<Project[]>(defaultData.projects)
+  const [news, setNews] = useState<NewsArticle[]>(defaultData.news)
+  const [team, setTeam] = useState<TeamMember[]>(defaultData.team)
+  const [services, setServices] = useState<Service[]>(defaultData.services)
+  const [jobs, setJobs] = useState<JobPosition[]>(defaultData.jobs)
+  const [certificates, setCertificates] = useState<Certificate[]>(defaultData.certificates)
+  const [partners, setPartners] = useState<Partner[]>(defaultData.partners)
+  const [contact, setContact] = useState<ContactInfo>(defaultData.contact)
+  const [stats, setStats] = useState<CompanyStats>(defaultData.stats)
+  const [adminAccounts, setAdminAccounts] = useState<AdminAccount[]>(defaultData.adminAccounts)
   const [currentAdminEmail, setCurrentAdminEmail] = useState<string | null>(null)
   const [isLoaded, setIsLoaded] = useState(false)
+
+  const applyAdminContent = useCallback((data: AdminContentData) => {
+    setProjects(data.projects)
+    setNews(data.news)
+    setTeam(data.team)
+    setServices(data.services)
+    setJobs(data.jobs)
+    setCertificates(data.certificates)
+    setPartners(data.partners)
+    setContact(data.contact)
+    setStats(data.stats)
+    setAdminAccounts(ensureDefaultAdminAccount(data.adminAccounts))
+  }, [])
+
+  const snapshot = useMemo<AdminContentData>(
+    () => ({
+      projects,
+      news,
+      team,
+      services,
+      jobs,
+      certificates,
+      partners,
+      contact,
+      stats,
+      adminAccounts,
+    }),
+    [projects, news, team, services, jobs, certificates, partners, contact, stats, adminAccounts]
+  )
 
   useEffect(() => {
     let isMounted = true
 
     const loadAdminData = async () => {
       try {
-        const parsed = await readPersistedJson<Partial<{
-          projects: Project[]
-          news: NewsArticle[]
-          team: TeamMember[]
-          services: Service[]
-          jobs: JobPosition[]
-          certificates: Certificate[]
-          partners: Partner[]
-          contact: ContactInfo
-          stats: CompanyStats
-          adminAccounts: AdminAccount[]
-        }>>(STORAGE_KEY)
+        const serverPayload = await fetchAdminContent()
+        let resolvedData = mergeAdminContent(serverPayload.data)
 
-        if (parsed && isMounted) {
-          if (parsed.projects) setProjects(parsed.projects)
-          if (parsed.news) setNews(parsed.news)
-          if (parsed.team) setTeam(parsed.team)
-          if (parsed.services) setServices(parsed.services)
-          if (parsed.jobs) setJobs(parsed.jobs)
-          if (parsed.certificates) setCertificates(parsed.certificates)
-          if (parsed.partners) setPartners(parsed.partners)
-          if (parsed.contact) setContact({ ...defaultContact, ...parsed.contact })
-          if (parsed.stats) setStats(parsed.stats)
-          if (parsed.adminAccounts?.length) {
-            setAdminAccounts(ensureDefaultAdminAccount(parsed.adminAccounts))
+        if (!serverPayload.hasStoredData) {
+          const localData = await readPersistedJson<Partial<AdminContentData>>(STORAGE_KEY)
+          if (localData) {
+            resolvedData = mergeAdminContent(localData)
+            await saveAdminContent(resolvedData)
           }
+        }
+
+        if (isMounted) {
+          applyAdminContent(resolvedData)
+          await writePersistedJson(STORAGE_KEY, resolvedData)
         }
       } catch (error) {
         console.error('Error loading admin data:', error)
+
+        const localData = await readPersistedJson<Partial<AdminContentData>>(STORAGE_KEY)
+        if (localData && isMounted) {
+          applyAdminContent(mergeAdminContent(localData))
+        }
       } finally {
         if (!isMounted) return
 
@@ -209,38 +212,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [applyAdminContent])
 
   useEffect(() => {
     if (!isLoaded) return
 
-    writePersistedJson(STORAGE_KEY, {
-        projects,
-        news,
-        team,
-        services,
-        jobs,
-        certificates,
-        partners,
-        contact,
-        stats,
-        adminAccounts,
-      }).catch((error) => {
-        console.error('Error saving admin data:', error)
-      })
-  }, [
-    projects,
-    news,
-    team,
-    services,
-    jobs,
-    certificates,
-    partners,
-    contact,
-    stats,
-    adminAccounts,
-    isLoaded,
-  ])
+    writePersistedJson(STORAGE_KEY, snapshot).catch((error) => {
+      console.error('Error saving browser cache:', error)
+    })
+
+    saveAdminContent(snapshot).catch((error) => {
+      console.error('Error saving admin data:', error)
+    })
+  }, [snapshot, isLoaded])
 
   useEffect(() => {
     if (!isLoaded) return
@@ -376,9 +360,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         return { success: false, message: 'Ad, email və şifrə mütləqdir.' }
       }
 
-      const exists = adminAccounts.some(
-        (item) => item.email.trim().toLowerCase() === normalizedEmail
-      )
+      const exists = adminAccounts.some((item) => item.email.trim().toLowerCase() === normalizedEmail)
 
       if (exists) {
         return { success: false, message: 'Bu email ilə hesab artıq mövcuddur.' }
@@ -549,3 +531,5 @@ export function useAdmin() {
 
   return context
 }
+
+export type { ContactInfo }
