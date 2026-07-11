@@ -29,7 +29,7 @@ interface Project {
 export default function ProjectDetailPage() {
   const params = useParams()
   const slug = params.slug as string
-  const { projects } = useAdmin()
+  const { projects, isReady } = useAdmin()
 
   const project = useMemo(() => projects.find((p) => p.slug === slug), [projects, slug])
   const relatedProjects = useMemo(() => {
@@ -39,6 +39,16 @@ export default function ProjectDetailPage() {
       .filter((p) => project && p.category === project.category && p.id !== project.id)
       .slice(0, 3)
   }, [projects, project])
+
+  // Admin content is loaded asynchronously. Calling notFound before that request
+  // finishes makes every newly-added project briefly resolve against defaults.
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+      </div>
+    )
+  }
 
   if (!project) {
     notFound()
