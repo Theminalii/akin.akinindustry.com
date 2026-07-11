@@ -48,15 +48,6 @@ const processSteps = [
   },
 ]
 
-const advantages = [
-  'ISO 9001:2015 sertifikatlı keyfiyyət idarəetmə sistemi',
-  'Beynəlxalq standartlara uyğun tikinti materialları',
-  '350+ peşəkar mühəndis və fəhlə heyəti',
-  'Müasir tikinti texnologiyaları və avadanlıqları',
-  '25 illik sektorda təcrübə və uğurlu layihələr',
-  'Layihələrin vaxtında və büdcə daxilində tamamlanması',
-]
-
 export default function ServicesPage() {
   return (
     <>
@@ -147,47 +138,6 @@ export default function ServicesPage() {
                 <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Image */}
-            <div className="relative">
-              <div className="aspect-4/3 rounded-2xl overflow-hidden bg-primary/10 relative">
-                <div className="absolute inset-0 bg-linear-to-br from-primary/20 to-transparent" />
-              </div>
-              <div className="absolute -bottom-6 -right-6 md:bottom-8 md:-right-8 bg-accent text-accent-foreground p-6 rounded-xl shadow-xl">
-                <div className="text-4xl font-bold">500+</div>
-                <div className="text-sm">Uğurlu Layihə</div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div>
-              <span className="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                Niyə Biz?
-              </span>
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 text-balance">
-                Tikinti Sahəsində Etibarlı Tərəfdaşınız
-              </h2>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-                25 ildən artıq təcrübə ilə yüzlərlə layihəni uğurla tamamlamış peşəkar komandamız, 
-                sizin tikinti ehtiyaclarınız üçün ən doğru seçimdir.
-              </p>
-
-              <ul className="space-y-4">
-                {advantages.map((item, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-accent shrink-0 mt-0.5" />
-                    <span className="text-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </section>
