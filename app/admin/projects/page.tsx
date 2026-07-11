@@ -46,11 +46,20 @@ export default function ProjectsAdmin() {
 
   const handleSubmit = () => {
     if (!formData.title || !formData.slug) return alert('Başlıq və slug mütləqdir')
+    const normalizedFormData = {
+      ...formData,
+      slug: formData.slug
+        .trim()
+        .toLocaleLowerCase('az')
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9əğıöşüç-]/g, '')
+        .replace(/-+/g, '-'),
+    }
     if (editingId) {
-      updateProject(editingId, formData)
+      updateProject(editingId, normalizedFormData)
       setEditingId(null)
     } else {
-      addProject({ ...formData, id: Date.now().toString() })
+      addProject({ ...normalizedFormData, id: Date.now().toString() })
     }
     handleCancel()
   }

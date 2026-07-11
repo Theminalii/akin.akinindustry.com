@@ -28,13 +28,15 @@ interface Project {
 
 export default function ProjectDetailPage() {
   const params = useParams()
-  const slug = params.slug as string
+  const slug = decodeURIComponent(params.slug as string).trim()
   const { projects, isReady } = useAdmin()
 
-  const project = useMemo(() => projects.find((p) => p.slug === slug), [projects, slug])
+  const project = useMemo(
+    () => projects.find((p) => decodeURIComponent(p.slug).trim() === slug),
+    [projects, slug]
+  )
   const relatedProjects = useMemo(() => {
     if (!project) return []
-    const foundProject = projects.find((p) => p.slug === slug)
     return projects
       .filter((p) => project && p.category === project.category && p.id !== project.id)
       .slice(0, 3)
